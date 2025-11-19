@@ -6,9 +6,14 @@
   "permissions": [
     "activeTab",
     "clipboardWrite",
-    "storage"
+    "storage",
+    "scripting"
   ],
   "action": {
-    "default_popup": "popup.html"
-  }
+    "default_icon": "icon.svg"
+  },
+  "background": {
+    "service_worker": "background.js"
+  },
+  "options_page": "options.html"
 }
