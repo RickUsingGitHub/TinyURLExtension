@@ -5,7 +5,6 @@
   "description": "Shortens the current tab's URL using the TinyURL API.",
   "permissions": [
     "activeTab",
-    "clipboardWrite",
     "storage",
     "scripting"
   ],

@@ -15,11 +15,11 @@ This Chrome extension shortens the current tab's URL using the TinyURL API.
 ## How to Use
 
 1.  **Get a TinyURL API Key:** You'll need a free API key from the TinyURL website.
-2.  **Save the API Key:**
-    *   Click the extension icon in your toolbar.
+2.  **Set the API Key:**
+    *   Right-click the extension icon in your toolbar and select "Options".
     *   Paste your API key into the input field and click "Save".
+    *   If you click the extension icon before setting a key, the options page will open automatically.
 3.  **Shorten a URL:**
-    *   Go to the tab you want to shorten.
+    *   Navigate to the tab with the URL you want to shorten.
     *   Click the extension icon.
-    *   Click "Shorten URL".
-4.  The shortened URL will be displayed and copied to your clipboard.
+4.  The shortened URL will be automatically copied to your clipboard. The icon will briefly show "OK" on a green background if successful, or "ERR" on a red background if there was a problem.
