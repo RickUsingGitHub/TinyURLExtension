@@ -1,0 +1,14 @@
+{
+  "manifest_version": 3,
+  "name": "TinyURL Shortener",
+  "version": "1.0",
+  "description": "Shortens the current tab's URL using the TinyURL API.",
+  "permissions": [
+    "activeTab",
+    "clipboardWrite",
+    "storage"
+  ],
+  "action": {
+    "default_popup": "popup.html"
+  }
+}
