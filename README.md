@@ -22,4 +22,4 @@ This Chrome extension shortens the current tab's URL using the TinyURL API.
 3.  **Shorten a URL:**
     *   Navigate to the tab with the URL you want to shorten.
     *   Click the extension icon.
-4.  The shortened URL will be automatically copied to your clipboard. The icon will briefly show "OK" on a green background if successful, or "ERR" on a red background if there was a problem.
+4.  The shortened URL will be automatically copied to your clipboard. The icon will briefly show "OK" on a green background once the link is on your clipboard, or "ERR" on a red background if there was a problem. Chrome doesn't let extensions into its own pages (`chrome://…`, the Web Store), so those always show "ERR".

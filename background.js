@@ -1,57 +1,53 @@
 // background.js
 
-// Function to handle the API call and response
-function shortenUrl(tab, apiKey) {
-  const url = tab.url;
+function setBadge(tabId, text, color) {
+  chrome.action.setBadgeText({ text, tabId });
+  if (color) chrome.action.setBadgeBackgroundColor({ color, tabId });
+}
 
-  // Provide user feedback that something is happening
-  chrome.action.setBadgeText({ text: '...', tabId: tab.id });
-  chrome.action.setBadgeBackgroundColor({ color: '#FFA500', tabId: tab.id });
-
-  fetch('https://api.tinyurl.com/create', {
-    method: 'POST',
-    headers: {
-      'Content-Type': 'application/json',
-      'Authorization': `Bearer ${apiKey}`
-    },
-    body: JSON.stringify({ url: url })
-  })
-  .then(response => response.json())
-  .then(data => {
-    if (data.data && data.data.tiny_url) {
-      const shortenedUrl = data.data.tiny_url;
-
-      // Use the scripting API to copy to clipboard
-      chrome.scripting.executeScript({
-        target: { tabId: tab.id },
-        func: (textToCopy) => {
-          navigator.clipboard.writeText(textToCopy);
-        },
-        args: [shortenedUrl]
-      });
-
-      // Success feedback
-      chrome.action.setBadgeText({ text: 'OK', tabId: tab.id });
-      chrome.action.setBadgeBackgroundColor({ color: '#4CAF50', tabId: tab.id });
-    } else {
-      // Handle API errors
-      chrome.action.setBadgeText({ text: 'ERR', tabId: tab.id });
-      chrome.action.setBadgeBackgroundColor({ color: '#F44336', tabId: tab.id });
-      console.error('TinyURL API Error:', data.errors || 'Unknown error');
+// Shorten the tab's URL with the TinyURL API and copy the result to the clipboard.
+// The badge shows "OK" only when the link really was copied.
+async function shortenUrl(tab, apiKey) {
+  setBadge(tab.id, '...', '#FFA500');
+  try {
+    const response = await fetch('https://api.tinyurl.com/create', {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+        'Authorization': `Bearer ${apiKey}`
+      },
+      body: JSON.stringify({ url: tab.url })
+    });
+    const data = await response.json().catch(() => ({}));
+    const shortenedUrl = data.data && data.data.tiny_url;
+    if (!response.ok || !shortenedUrl) {
+      throw new Error('TinyURL API error: ' + JSON.stringify(data.errors || response.status));
     }
-  })
-  .catch(error => {
-    // Handle network errors
-    chrome.action.setBadgeText({ text: 'ERR', tabId: tab.id });
-    chrome.action.setBadgeBackgroundColor({ color: '#F44336', tabId: tab.id });
-    console.error('Fetch Error:', error);
-  })
-  .finally(() => {
+
+    // Copy inside the page. This throws on pages extensions can't touch (chrome://,
+    // the Web Store), and writeText can be refused; either way we report ERR, not OK.
+    const [injection] = await chrome.scripting.executeScript({
+      target: { tabId: tab.id },
+      func: async (textToCopy) => {
+        try {
+          await navigator.clipboard.writeText(textToCopy);
+          return true;
+        } catch (e) {
+          return false;
+        }
+      },
+      args: [shortenedUrl]
+    });
+    if (!injection || injection.result !== true) throw new Error('Could not copy to the clipboard');
+
+    setBadge(tab.id, 'OK', '#4CAF50');
+  } catch (error) {
+    setBadge(tab.id, 'ERR', '#F44336');
+    console.error('TinyURL Shortener:', error);
+  } finally {
     // Clear the badge after a few seconds
-    setTimeout(() => {
-      chrome.action.setBadgeText({ text: '', tabId: tab.id });
-    }, 3000);
-  });
+    setTimeout(() => setBadge(tab.id, ''), 3000);
+  }
 }
 
 // Listen for a click on the extension's action icon
